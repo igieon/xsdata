@@ -1,4 +1,6 @@
 import warnings
+from datetime import datetime
+from datetime import timezone
 from decimal import Decimal
 from enum import Enum
 from typing import Any
@@ -11,6 +13,7 @@ from xsdata.exceptions import ConverterError
 from xsdata.formats.converter import BoolConverter
 from xsdata.formats.converter import Converter
 from xsdata.formats.converter import converter
+from xsdata.formats.converter import DatetimeConverter
 from xsdata.formats.converter import DecimalConverter
 from xsdata.formats.converter import EnumConverter
 from xsdata.formats.converter import FloatConverter
@@ -169,6 +172,25 @@ class DecimalConverterTests(TestCase):
         self.assertEqual("INF", self.converter.serialize(Decimal("+inf")))
         self.assertEqual("-INF", self.converter.serialize(Decimal("-inf")))
         self.assertEqual("8.77683E-8", self.converter.serialize(Decimal("8.77683E-8")))
+
+
+class DatetimeConverterTests(TestCase):
+    def setUp(self):
+        self.converter = DatetimeConverter()
+
+    def test_deserialize(self):
+        with self.assertRaises(ConverterError):
+            self.converter.deserialize("a")
+
+        self.assertEqual(
+            datetime(2002, 1, 1, 12, 1, 1, tzinfo=timezone.utc),
+            self.converter.deserialize("2002-01-01T12:01:01-00:00"),
+        )
+
+    def test_serialize(self):
+        value = datetime(2002, 1, 1, 12, 1, 1, tzinfo=timezone.utc)
+        output = "2002-01-01T12:01:01+00:00"
+        self.assertEqual(output, self.converter.serialize(value))
 
 
 class LxmlQNameConverterTests(TestCase):

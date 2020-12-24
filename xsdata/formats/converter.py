@@ -3,6 +3,7 @@ import math
 import warnings
 from dataclasses import dataclass
 from dataclasses import field
+from datetime import datetime
 from decimal import Decimal
 from decimal import InvalidOperation
 from enum import Enum
@@ -355,6 +356,17 @@ class EnumConverter(Converter):
         return converter.serialize(value.value, **kwargs)
 
 
+class DatetimeConverter(Converter):
+    def deserialize(self, value: str, **kwargs: Any) -> datetime:
+        try:
+            return datetime.fromisoformat(value)
+        except ValueError:
+            raise ConverterError()
+
+    def serialize(self, value: datetime, **kwargs: Any) -> str:
+        return value.isoformat()
+
+
 @dataclass
 class ProxyConverter(Converter):
     """
@@ -379,6 +391,7 @@ converter.register_converter(int, IntConverter())
 converter.register_converter(bool, BoolConverter())
 converter.register_converter(float, FloatConverter())
 converter.register_converter(object, StrConverter())
+converter.register_converter(datetime, DatetimeConverter())
 converter.register_converter(etree.QName, LxmlQNameConverter())
 converter.register_converter(QName, QNameConverter())
 converter.register_converter(Decimal, DecimalConverter())
